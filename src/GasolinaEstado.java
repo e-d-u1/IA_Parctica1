@@ -99,7 +99,6 @@ public class GasolinaEstado {
 
                         if (!cumpleRestricciones(asignacionesCamion, g, centroId) || g.getPeticiones().isEmpty()) continue;
 
-                        
                         Iterator<Integer> it = g.getPeticiones().iterator();
                         while (it.hasNext() && atendidas < 2) {
                             int petId = gasId * 10 + it.next(); // ID ficticio
