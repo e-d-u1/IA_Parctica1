@@ -92,12 +92,13 @@ public class GasolinaEstado {
     }
 
     private void generarSolucionInicialSimple() {
-        // Crear lista de peticiones pendientes
+        // Crear lista de peticiones pendientes temporal
+        ArrayList<Integer> pendientes = new ArrayList<>();
 
         for (int i = 0; i < gasolineras.size(); i++) {
             Gasolinera g = gasolineras.get(i);
             for (int j = 0; j < g.getPeticiones().size(); j++) {
-                peticionesPendientes.add(i * 10 + j); // ID único: gasolinera*10 + deposito
+                pendientes.add(i * 10 + j); // ID único: gasolinera*10 + depósito
             }
         }
 
@@ -107,12 +108,13 @@ public class GasolinaEstado {
         double[] distanciaRecorrida = new double[numCamiones];
 
         Random rnd = new Random();
+        ArrayList<Integer> noAsignadas = new ArrayList<>();
 
         // Mientras queden peticiones pendientes
-        while (!peticionesPendientes.isEmpty()) {
+        while (!pendientes.isEmpty()) {
             // Tomamos una petición al azar
-            int index = rnd.nextInt(peticionesPendientes.size());
-            int petId = peticionesPendientes.get(index);
+            int index = rnd.nextInt(pendientes.size());
+            int petId = pendientes.get(index);
 
             int gasolineraId = petId / 10;
             Gasolinera g = gasolineras.get(gasolineraId);
@@ -122,16 +124,14 @@ public class GasolinaEstado {
             double menorDistancia = Double.MAX_VALUE;
 
             for (int i = 0; i < numCamiones; i++) {
-                if (viajesRealizados[i] >= MAX_VIAJES)
-                    continue;
+                if (viajesRealizados[i] >= MAX_VIAJES) continue;
 
                 Distribucion centro = centros.get(i);
                 double distanciaViaje = Math.abs(centro.getCoordX() - g.getCoordX()) +
-                        Math.abs(centro.getCoordY() - g.getCoordY());
+                                        Math.abs(centro.getCoordY() - g.getCoordY());
                 distanciaViaje *= 2; // ida y vuelta
 
-                if (distanciaRecorrida[i] + distanciaViaje > MAX_DISTANCIA)
-                    continue;
+                if (distanciaRecorrida[i] + distanciaViaje > MAX_DISTANCIA) continue;
 
                 if (distanciaViaje < menorDistancia) {
                     menorDistancia = distanciaViaje;
@@ -144,11 +144,20 @@ public class GasolinaEstado {
                 asignacionCamionPeticiones.get(mejorCamion).add(petId);
                 viajesRealizados[mejorCamion]++;
                 distanciaRecorrida[mejorCamion] += menorDistancia;
+            } else {
+                // Si no se puede asignar, queda pendiente
+                noAsignadas.add(petId);
             }
-            // La petición se elimina de pendientes aunque no se haya asignado
-            peticionesPendientes.remove(index);
+
+            // Quitamos la petición temporal de la lista
+            pendientes.remove(index);
         }
 
+        // Guardar las que no pudieron asignarse en peticionesPendientes
+        peticionesPendientes.addAll(noAsignadas);
+
+        // Recalcular métricas totales
+        calcularBeneficioYDistancia();
     }
 
 

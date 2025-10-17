@@ -90,28 +90,26 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
                 }
             }
         }
-
         // 3. Desasignar una petición de un camión (devolver a pendientes)
-
-        // recorremos tdos los camiones y sus peticiones
         for (int i = 0; i < numCamiones; i++) {
-            ArrayList<Integer> camionI = asignaciones.get(i);
-            for (int j = 0; j < camionI.size(); j++) {
-                int peticion = camionI.get(j);
+            // Iteramos sobre una copia de la lista de peticiones para evitar problemas de
+            // concurrencia
+            ArrayList<Integer> camionI = new ArrayList<>(asignaciones.get(i));
 
-                // creamos copia del estado
+            for (int peticion : camionI) {
+                // Crear copia del estado
                 GasolinaEstado newBoard = board.copia();
 
-                // Quitamos la petición del camión i 
-                // casteandolo a integer por la misma razon que en 1. 
+                // Quitar la petición del camión en la copia
                 newBoard.getAsignacionCamionPeticiones().get(i).remove((Integer) peticion);
 
-                // Añadirla a la lista de pendientes
+                // Añadir la petición a la lista de pendientes en la copia
                 newBoard.getPeticionesPendientes().add(peticion);
 
                 // Recalcular métricas
                 newBoard.calcularBeneficioYDistancia();
 
+                // Añadir el sucesor
                 retval.add(new Successor(
                         "Desasignar petición " + peticion + " del camión " + i,
                         newBoard));
@@ -119,29 +117,25 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         }
 
         // 4. Asignar una petición pendiente a un camión
-        ArrayList<Integer> pendientes = new ArrayList<>(board.getPeticionesPendientes()); // ← copia segura
-        
-        // recorremos tdos los camiones y sus peticiones
+        // Iteramos sobre una copia de la lista de pendientes para no modificar el
+        // original durante la iteración
+        ArrayList<Integer> pendientes = new ArrayList<>(board.getPeticionesPendientes());
+
         for (int pet : pendientes) {
             for (int i = 0; i < numCamiones; i++) {
-
                 // Crear copia del estado
                 GasolinaEstado newBoard = board.copia();
 
-                // Comprobar restricciones antes de añadir
-                if (!cumpleRestricciones(newBoard, i))
-                    continue;
-
-                // Añadir petición al camión
+                // Añadir petición al camión en la copia
                 newBoard.getAsignacionCamionPeticiones().get(i).add(pet);
 
-                // Quitarla de pendientes
+                // Quitar la petición de pendientes en la copia
                 newBoard.getPeticionesPendientes().remove((Integer) pet);
 
                 // Recalcular métricas
                 newBoard.calcularBeneficioYDistancia();
 
-                // Verificar que sigue cumpliendo restricciones
+                // Verificar restricciones después de añadir
                 if (cumpleRestricciones(newBoard, i)) {
                     retval.add(new Successor(
                             "Añadir petición " + pet + " al camión " + i,
@@ -161,4 +155,4 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
 
         return distancia <= GasolinaEstado.MAX_DISTANCIA && viajes <= GasolinaEstado.MAX_VIAJES;
     }
-}   
+}
