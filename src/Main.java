@@ -33,31 +33,25 @@ public class Main {
                 new GasolinaHeuristicFunction() // función heurística (evaluación)
         );
 
-        /* 
-                    // Instantiate the search algorithm
-            Search alg = new HillClimbingSearch(); // o new SimulatedAnnealingSearch( parametros)
-
-            // Instantiate the SearchAgent object (ejecutar la busqueda)
-            SearchAgent agent = new SearchAgent(problema, alg);
-
-            // We print the results of the search
-            System.out.println();
-            printActions(agent.getActions());
-            printInstrumentation(agent.getInstrumentation());
-
-            // You can access also to the goal state using the
-            // method getGoalState of class Search
-            
-            GasolinaEstado estadoFinal = (GasolinaEstado) ((HillClimbingSearch) alg).getGoalState();
-            System.out.println("\nBeneficio final: " + estadoFinal.getBeneficio());
-            System.out.println("Distancia total recorrida: " + estadoFinal.getDistanciaTotal());
-            estadoFinal.imprimirResumenCamiones();
-
         
-        */
+        // Instantiate the search algorithm
+        Search alg = new HillClimbingSearch(); // o new SimulatedAnnealingSearch( parametros)
 
-       
-     
+        // Instantiate the SearchAgent object (ejecutar la busqueda)
+        SearchAgent agent = new SearchAgent(problema, alg);
+
+        // We print the results of the search
+        System.out.println();
+        printActions(agent.getActions());
+        printInstrumentation(agent.getInstrumentation());
+
+        // You can access also to the goal state using the
+        // method getGoalState of class Search
+        
+        GasolinaEstado estadoFinal = (GasolinaEstado) ((HillClimbingSearch) alg).getGoalState();
+        System.out.println("\nBeneficio final: " + estadoFinal.getBeneficio());
+        System.out.println("Distancia total recorrida: " + estadoFinal.getDistanciaTotal());
+        estadoFinal.imprimirResumenCamiones();     
 
     }
 

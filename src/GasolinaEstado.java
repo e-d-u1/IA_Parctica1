@@ -15,30 +15,27 @@ public class GasolinaEstado {
     // Asignaciones dinámicas (lo que cambia de estado a estado)
     private ArrayList<ArrayList<Integer>> asignacionCamionPeticiones;
     
-    // asignacionCamionPeticiones[i] = lista de IDs de peticiones que atiende el
-    // camión i
+    // asignacionCamionPeticiones[i] = lista de IDs de peticiones que atiende el camión i
 
     private double beneficioTotal;
     private double distanciaTotal;
 
-    // Parámetros del problema (podrías moverlos a una clase Config)
     private static final int MAX_VIAJES = 5;
     private static final int MAX_DISTANCIA = 640;
     private static final double COSTE_KM = 2.0;
     private static final int VALOR_DEPOSITO = 1000;
     
-    // Extras
+    // Integracion 
     
     private ArrayList<Integer> petNoAtendidas;
 
-
-    // -----------------------------------------------------
     // CONSTRUCTOR
-    // -----------------------------------------------------
     public GasolinaEstado(Gasolineras g, CentrosDistribucion c) {
         this.gasolineras = g;
         this.centros = c;
         this.camionesPorCentro = 1; // HARDCODEADO
+          System.out.println("Peticiones totales Ini: " + getNumPeticiones());
+ 
 
         // Inicializa la estructura de asignación
         int numCamiones = c.size() * this.camionesPorCentro;
@@ -47,12 +44,22 @@ public class GasolinaEstado {
             asignacionCamionPeticiones.add(new ArrayList<>());
         }
 
-         System.out.println("PRUEBA COMPLETADA");
-        // Estrategia inicial simple (asignar peticiones aleatoriamente)
         generarSolucionInicialOrdenada();
-        imprimirResumenCamiones();
-        // Calcular métricas iniciales
-        //calcularBeneficioYDistancia();
+
+        calcularBeneficioYDistancia();
+    }
+
+    // Constructor privado sin inicializar
+    private GasolinaEstado(Gasolineras g, CentrosDistribucion c, boolean sinInicializar) {
+        this.gasolineras = g;
+        this.centros = c;
+        this.camionesPorCentro = 1;
+
+        int numCamiones = c.size() * this.camionesPorCentro;
+        asignacionCamionPeticiones = new ArrayList<>();
+        for (int i = 0; i < numCamiones; i++) {
+            asignacionCamionPeticiones.add(new ArrayList<>());
+        }
     }
 
     private void generarSolucionInicialSimple() {
@@ -63,7 +70,7 @@ public class GasolinaEstado {
             Gasolinera g = gasolineras.get(i);
             for (int j = 0; j < g.getPeticiones().size(); j++) {
                 int camion = rnd.nextInt(centros.size());
-                asignacionCamionPeticiones.get(camion).add(i * 10 + j); // ID ficticio de petición
+                asignacionCamionPeticiones.get(camion).add(i * 10 + j); // idPeticon 
             }
         }
     }
@@ -75,11 +82,12 @@ public class GasolinaEstado {
     private void generarSolucionInicialOrdenada() {
         precalcularMatrizDistancias(); // ya genera gasolinerasOrdenadas[centroId]
 
+        System.out.println("GENERAMOS SOLUCION INICIAL ORDENADA");
+                        
         int numCentros = centros.size();
         boolean quedanPeticiones = true;
         while(quedanPeticiones){
             quedanPeticiones = false;
-
 
             for (int centroId = 0; centroId < numCentros; centroId++) {
                 // Cada camión del centro
@@ -87,21 +95,26 @@ public class GasolinaEstado {
                     int camionId = centroId * camionesPorCentro + k;
                     ArrayList<Integer> asignacionesCamion = asignacionCamionPeticiones.get(camionId);
 
-                    // Si ya hizo MAX_VIAJES, saltamos
+                  
                     if (asignacionesCamion.size() / 2 >= MAX_VIAJES) continue;
 
-                    // Buscamos la primera gasolinera con peticiones
+                    // Primea gasolinera con peticiones
                     boolean asignado = false;
+                    
                     int atendidas = 0;
                     for (int gasId : gasolinerasOrdenadas[centroId]) {
                         Gasolinera g = gasolineras.get(gasId);
+                        if(g.getPeticiones().isEmpty()) continue;
+                        //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas?? " + gasId);
+                        
 
-
-                        if (!cumpleRestricciones(asignacionesCamion, g, centroId) || g.getPeticiones().isEmpty()) continue;
-
+                        if (!cumpleRestricciones(asignacionesCamion, g, centroId)) continue;
+                        
+                        //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas " + gasId);
+                        
                         Iterator<Integer> it = g.getPeticiones().iterator();
                         while (it.hasNext() && atendidas < 2) {
-                            int petId = gasId * 10 + it.next(); // ID ficticio
+                            int petId = gasId * 10 + it.next(); 
                             asignacionesCamion.add(petId);
                             it.remove();
                             atendidas++;
@@ -118,6 +131,13 @@ public class GasolinaEstado {
             
         calcularBeneficioYDistancia();
 
+    }
+    private int getNumPeticiones(){
+        int total = 0;
+        for (Gasolinera g : gasolineras) {
+            total += g.getPeticiones().size();
+        }
+        return total;
     }
 
     public int calcDistanciaTotalviaje(Distribucion d, Gasolinera g1, Gasolinera g2) {
@@ -228,13 +248,17 @@ public class GasolinaEstado {
     }
 
     public GasolinaEstado copia() {
-        GasolinaEstado nuevo = new GasolinaEstado(this.gasolineras, this.centros);
-        nuevo.asignacionCamionPeticiones = new ArrayList<>();
-        for (ArrayList<Integer> lista : this.asignacionCamionPeticiones) {
-            nuevo.asignacionCamionPeticiones.add(new ArrayList<>(lista));
+        GasolinaEstado nuevo = new GasolinaEstado(this.gasolineras, this.centros, true);
+
+        // Copiar la asignación de camiones
+        for (int i = 0; i < this.asignacionCamionPeticiones.size(); i++) {
+            nuevo.asignacionCamionPeticiones.set(i, new ArrayList<>(this.asignacionCamionPeticiones.get(i)));
         }
+
+        // Copiar métricas
         nuevo.beneficioTotal = this.beneficioTotal;
         nuevo.distanciaTotal = this.distanciaTotal;
+
         return nuevo;
     }
 
