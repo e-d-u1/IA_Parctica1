@@ -33,13 +33,18 @@ public class GasolinaEstado {
     // ejemplo: petId = gasId * 10 + index
     // valor = días pendientes    
     private ArrayList<Integer> peticionesTotalesDias; 
+    private ArrayList<Boolean> peticionesUsadas;
 
     private void inicializaArrayPeticiones() {
         int numGasolineras = this.gasolineras.size();
         peticionesTotalesDias = new ArrayList<>();
+        peticionesUsadas = new ArrayList<>();
 
-        // Rellenamos con null o -1
-        for (int i = 0; i < numGasolineras * 10 + 10; i++) peticionesTotalesDias.add(null); 
+        // Inicializamos con null y false
+        for (int i = 0; i < numGasolineras * 10 + 10; i++) {
+            peticionesTotalesDias.add(null);
+            peticionesUsadas.add(false);
+        }
 
         // Llenamos los días reales
         for (int gasId = 0; gasId < numGasolineras; gasId++) {
@@ -48,6 +53,7 @@ public class GasolinaEstado {
             for (int dias : gas.getPeticiones()) {
                 int petId = gasId * 10 + index;
                 peticionesTotalesDias.set(petId, dias);
+                peticionesUsadas.set(petId, false); // inicialmente ninguna está usada
                 index++;
             }
         }
@@ -71,11 +77,10 @@ public class GasolinaEstado {
 
         inicializaArrayPeticiones();
 
-        generarSolucionInicialSimple();
-
+        generarSolucionInicialOrdenada();
+        actualizarPeticionesPendientes();
+    
         calcularBeneficioYDistancia();
-
-        
     }
 
     // Constructor privado sin inicializar
@@ -155,9 +160,6 @@ public class GasolinaEstado {
 
         // Guardar las que no pudieron asignarse en peticionesPendientes
         peticionesPendientes.addAll(noAsignadas);
-
-        // Recalcular métricas totales
-        calcularBeneficioYDistancia();
     }
 
 
@@ -169,10 +171,11 @@ public class GasolinaEstado {
         precalcularMatrizDistancias(); // ya genera gasolinerasOrdenadas[centroId]
 
         System.out.println("GENERAMOS SOLUCION INICIAL ORDENADA");
-                        
+        
         int numCentros = centros.size();
         boolean quedanPeticiones = true;
-        while(quedanPeticiones){
+
+        while (quedanPeticiones) {
             quedanPeticiones = false;
 
             for (int centroId = 0; centroId < numCentros; centroId++) {
@@ -181,41 +184,39 @@ public class GasolinaEstado {
                     int camionId = centroId * camionesPorCentro + k;
                     ArrayList<Integer> asignacionesCamion = asignacionCamionPeticiones.get(camionId);
 
-                  
                     if (asignacionesCamion.size() / 2 >= MAX_VIAJES) continue;
 
-                    // Primea gasolinera con peticiones
                     boolean asignado = false;
-                    
                     int atendidas = 0;
+
                     for (int gasId : gasolinerasOrdenadas[centroId]) {
                         Gasolinera g = gasolineras.get(gasId);
-                        if(g.getPeticiones().isEmpty()) continue;
-                        //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas?? " + gasId);
-                        
+                        if (g.getPeticiones().isEmpty()) continue;
 
                         if (!cumpleRestriccionesEdu(asignacionesCamion, g, centroId)) continue;
-                        
-                        //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas " + gasId);
-                        
-                        for (int idx = 0; idx < g.getPeticiones().size() && atendidas < 2; ) {
-                            int dias = g.getPeticiones().get(idx); // días pendientes
-                            int petId = gasId * 10 + idx; // ID correcto
 
+                        for (int idx = 0; idx < g.getPeticiones().size() && atendidas < 2; idx++) {
+                            int petId = gasId * 10 + idx;
+
+                            // Si ya está usada, saltamos
+                            if (peticionesUsadas.get(petId)) continue;
+
+                            // Asignamos al camión
                             asignacionesCamion.add(petId);
-                            g.getPeticiones().remove(idx); // eliminas la petición usada
+                            peticionesUsadas.set(petId, true);
                             atendidas++;
                             asignado = true;
                         }
 
-                        if (atendidas == 2) break; 
+                        if (atendidas == 2) break;
                     }
 
                     if (asignado) quedanPeticiones = true;
                 }
-            }    
+            }
         }
     }
+
     private int getNumPeticiones(){
         int total = 0;
         for (Gasolinera g : gasolineras) {
@@ -498,6 +499,24 @@ public class GasolinaEstado {
         return peticionesPendientes; 
     }
 
+    public int getTotalPeticionesAsignadas() {
+        int total = 0;
+        for (ArrayList<Integer> camion : asignacionCamionPeticiones) {
+            total += camion.size();
+        }
+        return total;
+    }
 
+    private void actualizarPeticionesPendientes() {
+        peticionesPendientes.clear();
 
+        for (int petId = 0; petId < peticionesTotalesDias.size(); petId++) {
+            Integer dias = peticionesTotalesDias.get(petId);
+            if (dias != null && !peticionesUsadas.get(petId)) {
+                peticionesPendientes.add(petId);
+            }
+        }
+
+        System.out.println("Peticiones pendientes: " + peticionesPendientes.size());
+    }
 }

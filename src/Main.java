@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         // Parameters
-        int numGasolineras = 50;
+        int numGasolineras = 100;
         int numCentros = 5;
         int numCamionesPorCentro = 2;
         int seedGasolineras = 1234;
@@ -55,6 +55,8 @@ public class Main {
 
         estadoFinal.calcularBeneficioYDistancia();    
 
+        // COMPROBACION EXTRA - Edu
+        System.out.println("Total peticiones asignadas: " + estadoFinal.getTotalPeticionesAsignadas());
     }
 
     private static void printInstrumentation(Properties properties) {
