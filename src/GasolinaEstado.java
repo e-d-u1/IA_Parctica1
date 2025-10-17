@@ -14,28 +14,51 @@ public class GasolinaEstado {
     private Integer camionesPorCentro;
     // Asignaciones dinámicas (lo que cambia de estado a estado)
     private ArrayList<ArrayList<Integer>> asignacionCamionPeticiones;
+    private ArrayList<Integer> peticionesPendientes; 
     
     // asignacionCamionPeticiones[i] = lista de IDs de peticiones que atiende el camión i
 
     private double beneficioTotal;
     private double distanciaTotal;
 
-    private static final int MAX_VIAJES = 5;
-    private static final int MAX_DISTANCIA = 640;
-    private static final double COSTE_KM = 2.0;
-    private static final int VALOR_DEPOSITO = 1000;
+    public static final int MAX_VIAJES = 5;
+    public static final int MAX_DISTANCIA = 640;
+    public static final int MAX_PETICIONES_GAS = 3; 
+    public static final double COSTE_KM = 2.0;
+    public static final int VALOR_DEPOSITO = 1000;
     
-    // Integracion 
-    
-    private ArrayList<Integer> petNoAtendidas;
+    // Integracion Solucion 2
+
+    // cada índice corresponde al mismo ID de petición que usas en asignacionCamionPeticiones
+    // ejemplo: petId = gasId * 10 + index
+    // valor = días pendientes    
+    private ArrayList<Integer> peticionesTotalesDias; 
+
+    private void inicializaArrayPeticiones() {
+        int numGasolineras = this.gasolineras.size();
+        peticionesTotalesDias = new ArrayList<>();
+
+        // Rellenamos con null o -1
+        for (int i = 0; i < numGasolineras * 10 + 10; i++) peticionesTotalesDias.add(null); 
+
+        // Llenamos los días reales
+        for (int gasId = 0; gasId < numGasolineras; gasId++) {
+            Gasolinera gas = this.gasolineras.get(gasId);
+            int index = 0;
+            for (int dias : gas.getPeticiones()) {
+                int petId = gasId * 10 + index;
+                peticionesTotalesDias.set(petId, dias);
+                index++;
+            }
+        }
+    }
 
     // CONSTRUCTOR
     public GasolinaEstado(Gasolineras g, CentrosDistribucion c) {
         this.gasolineras = g;
         this.centros = c;
         this.camionesPorCentro = 1; // HARDCODEADO
-          System.out.println("Peticiones totales Ini: " + getNumPeticiones());
- 
+        System.out.println("Peticiones totales Ini: " + getNumPeticiones());
 
         // Inicializa la estructura de asignación
         int numCamiones = c.size() * this.camionesPorCentro;
@@ -44,9 +67,15 @@ public class GasolinaEstado {
             asignacionCamionPeticiones.add(new ArrayList<>());
         }
 
-        generarSolucionInicialOrdenada();
+        peticionesPendientes = new ArrayList<>(); 
+
+        inicializaArrayPeticiones();
+
+        generarSolucionInicialSimple();
 
         calcularBeneficioYDistancia();
+
+        
     }
 
     // Constructor privado sin inicializar
@@ -63,17 +92,65 @@ public class GasolinaEstado {
     }
 
     private void generarSolucionInicialSimple() {
-        Random rnd = new Random();
-        int numPeticiones = gasolineras.size() * 3; // Máximo 3 peticiones por gasolinera aprox.
+        // Crear lista de peticiones pendientes
 
         for (int i = 0; i < gasolineras.size(); i++) {
             Gasolinera g = gasolineras.get(i);
             for (int j = 0; j < g.getPeticiones().size(); j++) {
-                int camion = rnd.nextInt(centros.size());
-                asignacionCamionPeticiones.get(camion).add(i * 10 + j); // idPeticon 
+                peticionesPendientes.add(i * 10 + j); // ID único: gasolinera*10 + deposito
             }
         }
+
+        // Inicializar métricas de cada camión
+        int numCamiones = centros.size();
+        int[] viajesRealizados = new int[numCamiones];
+        double[] distanciaRecorrida = new double[numCamiones];
+
+        Random rnd = new Random();
+
+        // Mientras queden peticiones pendientes
+        while (!peticionesPendientes.isEmpty()) {
+            // Tomamos una petición al azar
+            int index = rnd.nextInt(peticionesPendientes.size());
+            int petId = peticionesPendientes.get(index);
+
+            int gasolineraId = petId / 10;
+            Gasolinera g = gasolineras.get(gasolineraId);
+
+            // Buscar el camión más cercano que pueda atenderla
+            int mejorCamion = -1;
+            double menorDistancia = Double.MAX_VALUE;
+
+            for (int i = 0; i < numCamiones; i++) {
+                if (viajesRealizados[i] >= MAX_VIAJES)
+                    continue;
+
+                Distribucion centro = centros.get(i);
+                double distanciaViaje = Math.abs(centro.getCoordX() - g.getCoordX()) +
+                        Math.abs(centro.getCoordY() - g.getCoordY());
+                distanciaViaje *= 2; // ida y vuelta
+
+                if (distanciaRecorrida[i] + distanciaViaje > MAX_DISTANCIA)
+                    continue;
+
+                if (distanciaViaje < menorDistancia) {
+                    menorDistancia = distanciaViaje;
+                    mejorCamion = i;
+                }
+            }
+
+            // Si encontramos camión válido, asignamos
+            if (mejorCamion != -1) {
+                asignacionCamionPeticiones.get(mejorCamion).add(petId);
+                viajesRealizados[mejorCamion]++;
+                distanciaRecorrida[mejorCamion] += menorDistancia;
+            }
+            // La petición se elimina de pendientes aunque no se haya asignado
+            peticionesPendientes.remove(index);
+        }
+
     }
+
 
     /* Por cada Centro de Dsitribucion, al primero de sus camiones le sera asignada la gasolinera mas cercana que tenga peticion,
        se recorreran todas las gasolineras hasta que se complete el primer viaje de ese camion(2 gasolineras asignadas). 
@@ -108,15 +185,16 @@ public class GasolinaEstado {
                         //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas?? " + gasId);
                         
 
-                        if (!cumpleRestricciones(asignacionesCamion, g, centroId)) continue;
+                        if (!cumpleRestriccionesEdu(asignacionesCamion, g, centroId)) continue;
                         
                         //System.out.println("Para el camion " + camionId + " Y su asignacion " + asignacionesCamion.size()  + " puede usar gas " + gasId);
                         
-                        Iterator<Integer> it = g.getPeticiones().iterator();
-                        while (it.hasNext() && atendidas < 2) {
-                            int petId = gasId * 10 + it.next(); 
+                        for (int idx = 0; idx < g.getPeticiones().size() && atendidas < 2; ) {
+                            int dias = g.getPeticiones().get(idx); // días pendientes
+                            int petId = gasId * 10 + idx; // ID correcto
+
                             asignacionesCamion.add(petId);
-                            it.remove();
+                            g.getPeticiones().remove(idx); // eliminas la petición usada
                             atendidas++;
                             asignado = true;
                         }
@@ -128,9 +206,6 @@ public class GasolinaEstado {
                 }
             }    
         }
-            
-        calcularBeneficioYDistancia();
-
     }
     private int getNumPeticiones(){
         int total = 0;
@@ -146,7 +221,7 @@ public class GasolinaEstado {
         else return 0;     
     }
     /* Comprueba si al añadir a las asignaciones del camion en cuestion la gasolinera "a", no se pasa del MAX_KM */
-    private boolean cumpleRestricciones(ArrayList<Integer> asignacionesCamion, Gasolinera nueva, Integer centroId){
+    private boolean cumpleRestriccionesEdu(ArrayList<Integer> asignacionesCamion, Gasolinera nueva, Integer centroId){
         
         double distTotal = 0;
         
@@ -210,30 +285,46 @@ public class GasolinaEstado {
             if (peticiones.isEmpty())
                 continue;
 
-            // Centro del camión i
             Distribucion centro = centros.get(i);
-            int cx = centro.getCoordX();
-            int cy = centro.getCoordY();
 
-            for (int p : peticiones) {
-                int gasolineraId = p / 10; // (forma de obtenerla del ID ficticio)
-                Gasolinera g = gasolineras.get(gasolineraId);
-                int gx = g.getCoordX();
-                int gy = g.getCoordY();
+            for (int j = 0; j < peticiones.size(); j += 2) {
+                // Peticiones del viaje actual
+                
+                int petId1 = peticiones.get(j);
+                //System.out.println("La peticion " + petId1 + " tiene de longitud: " + peticionesTotalesDias.size());
+                Gasolinera g1 = gasolineras.get(petId1 / 10);
 
-                double distancia = Math.abs(cx - gx) + Math.abs(cy - gy);
-                totalDistancia += 2 * distancia; // ida y vuelta
+                Gasolinera g2 = null;
+                Integer petId2 = null;
+                if (j + 1 < peticiones.size()) {
+                    petId2 = peticiones.get(j + 1);
+                    g2 = gasolineras.get(petId2 / 10);
+                }
 
-                // Cálculo del precio con descuento por días pendientes
-                for (int dias : g.getPeticiones()) {
-                    double porcentajePrecio = (dias == 0) ? 1.02 : (1 - 0.02 * dias);
+                // Distancia del viaje completo
+                totalDistancia += calcDistanciaTotalviaje(centro, g1, g2);
+
+                // Beneficio de la primera petición
+                Integer dias1 = peticionesTotalesDias.get(petId1);
+                if (dias1 != null) {
+                    double porcentajePrecio = (dias1 == 0) ? 1.02 : (1 - 0.02 * dias1);
                     totalBeneficio += VALOR_DEPOSITO * porcentajePrecio;
+                }
+
+                // Beneficio de la segunda petición (si existe)
+                if (petId2 != null) {
+                    Integer dias2 = peticionesTotalesDias.get(petId2);
+                    if (dias2 != null) {
+                        double porcentajePrecio = (dias2 == 0) ? 1.02 : (1 - 0.02 * dias2);
+                        totalBeneficio += VALOR_DEPOSITO * porcentajePrecio;
+                    }
                 }
             }
         }
 
-        // Restar el coste del combustible recorrido
-        totalBeneficio -= COSTE_KM * totalDistancia;
+        //System.out.println("Tenemos beneficio de "  + totalBeneficio + " con distandia de " + totalDistancia);
+        // Restar coste de combustible
+        totalBeneficio =  totalBeneficio  - COSTE_KM * totalDistancia;
 
         this.beneficioTotal = totalBeneficio;
         this.distanciaTotal = totalDistancia;
@@ -256,8 +347,13 @@ public class GasolinaEstado {
         }
 
         // Copiar métricas
+        nuevo.peticionesTotalesDias = this.peticionesTotalesDias;
         nuevo.beneficioTotal = this.beneficioTotal;
         nuevo.distanciaTotal = this.distanciaTotal;
+        
+        nuevo.peticionesTotalesDias = new ArrayList<>(this.peticionesTotalesDias);
+        if (this.peticionesPendientes != null)
+            nuevo.peticionesPendientes = new ArrayList<>(this.peticionesPendientes);
 
         return nuevo;
     }
@@ -284,7 +380,48 @@ public class GasolinaEstado {
         return Math.abs(a.getCoordX() - b.getCoordX()) + Math.abs(a.getCoordY() - b.getCoordY()); 
     }
     
+    public int getViajesCamion(int camionId) {
+        ArrayList<Integer> peticiones = asignacionCamionPeticiones.get(camionId);
+        if (peticiones.isEmpty()) return 0;
+        // Cada viaje puede llevar hasta 2 peticiones
+        return (peticiones.size() + 1) / 2;
+    }
 
+    public double getDistanciaCamion(int camionId) {
+        double distTotal = 0;
+        ArrayList<Integer> peticiones = asignacionCamionPeticiones.get(camionId);
+        if (peticiones.isEmpty()) return 0;
+
+        Distribucion centro = centros.get(camionId);
+        int cx = centro.getCoordX();
+        int cy = centro.getCoordY();
+
+        for (int j = 0; j < peticiones.size(); j += 2) {
+            int pet1 = peticiones.get(j);
+            Gasolinera g1 = gasolineras.get(pet1 / 10);
+            int gx1 = g1.getCoordX();
+            int gy1 = g1.getCoordY();
+
+            int gx2 = gx1, gy2 = gy1;
+            if (j + 1 < peticiones.size()) {
+                int pet2 = peticiones.get(j + 1);
+                Gasolinera g2 = gasolineras.get(pet2 / 10);
+                gx2 = g2.getCoordX();
+                gy2 = g2.getCoordY();
+            }
+
+            double distViaje = Math.abs(cx - gx1) + Math.abs(cy - gy1);
+            if (j + 1 < peticiones.size()) {
+                distViaje += Math.abs(gx1 - gx2) + Math.abs(gy1 - gy2);
+                distViaje += Math.abs(gx2 - cx) + Math.abs(gy2 - cy);
+            } else {
+                distViaje += Math.abs(gx1 - cx) + Math.abs(gy1 - cy);
+            }
+
+            distTotal += distViaje;
+        }
+        return distTotal;
+    }
     public void imprimirResumenCamiones() {
         System.out.println("===== Resumen de camiones =====");
 
@@ -347,5 +484,11 @@ public class GasolinaEstado {
             System.out.println("Distancia total recorrida: " + distanciaTotalCamion + "\n");
         }
     }
+
+    public ArrayList<Integer> getPeticionesPendientes() {
+        return peticionesPendientes; 
+    }
+
+
 
 }

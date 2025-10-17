@@ -1,2 +1,8 @@
 javac -cp "lib/*;src" src/Main.java
 java -cp "lib/*;src" Main
+
+
+Pendiente:
+-Arreglar calulos de beneficio y distancias
+-PeticionID puede ser *3 ya que nunca tendremos index + 3
+-Tener en cuenta que con remove y add pueden haber asiganciones con NULL

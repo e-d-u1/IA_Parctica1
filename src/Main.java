@@ -51,7 +51,9 @@ public class Main {
         GasolinaEstado estadoFinal = (GasolinaEstado) ((HillClimbingSearch) alg).getGoalState();
         System.out.println("\nBeneficio final: " + estadoFinal.getBeneficio());
         System.out.println("Distancia total recorrida: " + estadoFinal.getDistanciaTotal());
-        estadoFinal.imprimirResumenCamiones();     
+        estadoFinal.imprimirResumenCamiones(); 
+
+        estadoFinal.calcularBeneficioYDistancia();    
 
     }
 
