@@ -78,7 +78,7 @@ public class GasolinaEstado {
 
         inicializaArrayPeticiones();
 
-        generarSolucionInicialOrdenada();
+        generarSolucionInicialSimple();
         actualizarPeticionesPendientes();
     
         calcularBeneficioYDistancia();
