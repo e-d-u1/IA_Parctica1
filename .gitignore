@@ -1,1 +1,9 @@
+# Ignorar clases compiladas
+*.class
+
+# Ignorar resultados locales
 resultados/
+
+# Ignorar archivos de configuración personales
+*.log
+*.pyc
