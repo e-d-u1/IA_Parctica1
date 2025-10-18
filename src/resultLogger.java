@@ -4,37 +4,55 @@ import java.util.Date;
 
 public class ResultLogger {
 
-    public static void guardarResultado(String algoritmo, String configuracion, GasolinaEstado estadoFinal, long tiempoEjecucion) {
+    /**
+     * Guarda los resultados de la simulación en un archivo de texto.
+     * Formato simplificado para fácil lectura desde Python.
+     */
+    public static void guardarResultado(String algoritmo, String configuracion, 
+                                        GasolinaEstado estadoInicial, GasolinaEstado estadoFinal, 
+                                        long tiempoEjecucion) {
         try {
+            // Generar nombre de archivo con timestamp
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String nombreArchivo = "resultados/resultados_" + algoritmo + "_" + timestamp + ".txt";
 
-            // Asegura que exista la carpeta resultados/
+            // Asegurar que la carpeta resultados/ existe
             new File("resultados").mkdirs();
 
-            FileWriter fw = new FileWriter(nombreArchivo);
-            BufferedWriter bw = new BufferedWriter(fw);
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombreArchivo))) {
 
-            bw.write("==== RESULTADOS ====\n");
-            bw.write("Algoritmo: " + algoritmo + "\n");
-            bw.write("Configuración: " + configuracion + "\n");
-            bw.write("Tiempo de ejecución: " + tiempoEjecucion + " ms\n\n");
+                // Encabezado explicativo
+                bw.write("# RESULTADOS SIMULACION GASOLINA\n");
+                bw.write("# Línea 1: Algoritmo\n");
+                bw.write("# Línea 2: Configuración\n");
+                bw.write("# Línea 3: Tiempo de ejecución (ms)\n");
+                bw.write("# Línea 4: Número total de peticiones iniciales\n");
+                bw.write("# Línea 5: Beneficio final\n");
+                bw.write("# Línea 6: Distancia total recorrida\n");
+                bw.write("# Líneas 7+: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
+                bw.write("# Última línea: Total de peticiones asignadas\n");
+                bw.write("----------\n");
 
-            bw.write("==== ESTADO FINAL ====\n");
-            bw.write("Beneficio total: " + estadoFinal.getBeneficio() + "\n");
-            bw.write("Distancia total: " + estadoFinal.getDistanciaTotal() + "\n");
-            bw.write("Peticiones no asignadas: " + estadoFinal.getPeticionesPendientes().size() + "\n");
+                // Datos principales
+                bw.write(algoritmo + "\n");
+                bw.write(configuracion + "\n");
+                bw.write(tiempoEjecucion + "\n");
+                bw.write(estadoInicial.getNumPeticiones() + "\n");
+                bw.write(estadoFinal.getBeneficio() + "\n");
+                bw.write(estadoFinal.getDistanciaTotal() + "\n");
 
-            bw.write("---- Detalle por camión ----\n");
-            for (int i = 0; i < estadoFinal.getAsignacionCamionPeticiones().size(); i++) {
-                bw.write("Camión " + i + ": " +
-                        estadoFinal.getAsignacionCamionPeticiones().get(i).size() + " peticiones, " +
-                        "distancia " + estadoFinal.getDistanciaCamion(i) + ", " +
-                        "viajes " + estadoFinal.getViajesCamion(i) + "\n");
+                // Detalle por camión
+                for (int i = 0; i < estadoFinal.getAsignacionCamionPeticiones().size(); i++) {
+                    bw.write(i + "," +
+                            estadoFinal.getAsignacionCamionPeticiones().get(i).size() + "," +
+                            estadoFinal.getDistanciaCamion(i) + "," +
+                            estadoFinal.getViajesCamion(i) + "\n");
+                }
+
+                // Total de peticiones asignadas
+                bw.write(estadoFinal.getTotalPeticionesAsignadas() + "\n");
             }
 
-            bw.close();
-            fw.close();
             System.out.println("Resultados guardados en " + nombreArchivo);
 
         } catch (IOException e) {

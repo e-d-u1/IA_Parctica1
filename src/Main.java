@@ -52,7 +52,7 @@ public class Main {
                     ", stiter=" + cfg.stiter +
                     ", k=" + cfg.k +
                     ", lambda=" + cfg.lambda;
-            ResultLogger.guardarResultado("SA", configuracion, estadoFinal, endTime - startTime);
+            ResultLogger.guardarResultado("SA", configuracion, estadoInicial, estadoFinal, endTime - startTime);
         }
     }
 
@@ -81,7 +81,7 @@ public class Main {
         mostrarResultadosFinales(estadoFinal);
 
         if (cfg.guardarResultados) {
-            ResultLogger.guardarResultado("HC", "-", estadoFinal, endTime - startTime);
+            ResultLogger.guardarResultado("HC", "-", estadoInicial, estadoFinal, endTime - startTime);
         }
     }
 

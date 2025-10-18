@@ -217,7 +217,7 @@ public class GasolinaEstado {
         }
     }
 
-    private int getNumPeticiones(){
+    public int getNumPeticiones(){
         int total = 0;
         for (Gasolinera g : gasolineras) {
             total += g.getPeticiones().size();
