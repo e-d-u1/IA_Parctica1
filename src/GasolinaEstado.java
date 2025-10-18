@@ -32,6 +32,7 @@ public class GasolinaEstado {
     // cada índice corresponde al mismo ID de petición que usas en asignacionCamionPeticiones
     // ejemplo: petId = gasId * 10 + index
     // valor = días pendientes    
+    // Solo usamos las siguientes variables para la generar la 1a solucion
     private ArrayList<Integer> peticionesTotalesDias; 
     private ArrayList<Boolean> peticionesUsadas;
 
@@ -97,6 +98,7 @@ public class GasolinaEstado {
     }
 
     private void generarSolucionInicialSimple() {
+         System.out.println("GENERAMOS SOLUCION INICIAL SIMPLE");
         // Crear lista de peticiones pendientes temporal
         ArrayList<Integer> pendientes = new ArrayList<>();
 
@@ -147,6 +149,7 @@ public class GasolinaEstado {
             // Si encontramos camión válido, asignamos
             if (mejorCamion != -1) {
                 asignacionCamionPeticiones.get(mejorCamion).add(petId);
+                peticionesUsadas.set(petId, true);
                 viajesRealizados[mejorCamion]++;
                 distanciaRecorrida[mejorCamion] += menorDistancia;
             } else {
