@@ -1,0 +1,20 @@
+==== RESULTADOS ====
+Algoritmo: HC
+Configuración: -
+Tiempo de ejecución: 325 ms
+
+==== ESTADO FINAL ====
+Beneficio total: 60804.0
+Distancia total: 2878.0
+Peticiones no asignadas: 0
+---- Detalle por camión ----
+Camión 0: 6 peticiones, distancia 212.0, viajes 3
+Camión 1: 4 peticiones, distancia 238.0, viajes 2
+Camión 2: 10 peticiones, distancia 370.0, viajes 5
+Camión 3: 10 peticiones, distancia 410.0, viajes 5
+Camión 4: 8 peticiones, distancia 314.0, viajes 4
+Camión 5: 5 peticiones, distancia 226.0, viajes 3
+Camión 6: 7 peticiones, distancia 342.0, viajes 4
+Camión 7: 2 peticiones, distancia 134.0, viajes 1
+Camión 8: 9 peticiones, distancia 264.0, viajes 5
+Camión 9: 6 peticiones, distancia 368.0, viajes 3

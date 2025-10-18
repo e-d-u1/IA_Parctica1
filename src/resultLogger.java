@@ -21,11 +21,11 @@ public class ResultLogger {
             bw.write("Tiempo de ejecución: " + tiempoEjecucion + " ms\n\n");
 
             bw.write("==== ESTADO FINAL ====\n");
-            bw.write("Beneficio total: " + estadoFinal.getBeneficioTotal() + "\n");
+            bw.write("Beneficio total: " + estadoFinal.getBeneficio() + "\n");
             bw.write("Distancia total: " + estadoFinal.getDistanciaTotal() + "\n");
             bw.write("Peticiones no asignadas: " + estadoFinal.getPeticionesPendientes().size() + "\n");
-            bw.write("---- Detalle por camión ----\n");
 
+            bw.write("---- Detalle por camión ----\n");
             for (int i = 0; i < estadoFinal.getAsignacionCamionPeticiones().size(); i++) {
                 bw.write("Camión " + i + ": " +
                         estadoFinal.getAsignacionCamionPeticiones().get(i).size() + " peticiones, " +

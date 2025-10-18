@@ -6,3 +6,6 @@ Pendiente:
 -Arreglar calulos de beneficio y distancias
 -PeticionID puede ser *3 ya que nunca tendremos index + 3
 -Tener en cuenta que con remove y add pueden haber asiganciones con NULL
+
+
+!!! Solo funciona con 2 camiones por centro pq el centros.size() entonces es = 10,
