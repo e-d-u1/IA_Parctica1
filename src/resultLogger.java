@@ -1,39 +1,38 @@
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 
 public class ResultLogger {
 
-    /**
-     * Guarda los resultados de la simulación en un archivo de texto.
-     * Formato simplificado para fácil lectura desde Python.
-     */
-    public static void guardarResultado(String algoritmo, String configuracion, 
-                                        GasolinaEstado estadoInicial, GasolinaEstado estadoFinal, 
-                                        long tiempoEjecucion) {
+    public static void guardarResultado(String algoritmo, String configuracion,
+                                        GasolinaEstado estadoInicial, GasolinaEstado estadoFinal,
+                                        long tiempoEjecucion, Config cfg) {
         try {
-            // Generar nombre de archivo con timestamp
-            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String nombreArchivo = "resultados/resultados_" + algoritmo + "_" + timestamp + ".txt";
+            // Generar un ID simple y único (timestamp + número aleatorio)
+            String idUnico = new SimpleDateFormat("HHmmss").format(new Date());
 
-            // Asegurar que la carpeta resultados/ existe
+            // Crear nombre del archivo con el formato deseado
+            String nombreArchivo = String.format("resultados/exp%d_%s.txt",
+                    cfg.numExperimento,idUnico);
+
+            // Asegurar que exista la carpeta resultados/
             new File("resultados").mkdirs();
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombreArchivo))) {
 
-                // Encabezado explicativo
+                // Encabezado informativo
                 bw.write("# RESULTADOS SIMULACION GASOLINA\n");
                 bw.write("# Línea 1: Algoritmo\n");
-                bw.write("# Línea 2: Configuración\n");
+                bw.write("# Línea 2: Parámetros de configuración\n");
                 bw.write("# Línea 3: Tiempo de ejecución (ms)\n");
                 bw.write("# Línea 4: Número total de peticiones iniciales\n");
                 bw.write("# Línea 5: Beneficio final\n");
                 bw.write("# Línea 6: Distancia total recorrida\n");
-                bw.write("# Líneas 7+: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
-                bw.write("# Última línea: Total de peticiones asignadas\n");
-                bw.write("----------\n");
+                bw.write("# Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
+                bw.write("# Última línea: Total de peticiones asignadas\n\n");
 
-                // Datos principales
+                // Datos generales
                 bw.write(algoritmo + "\n");
                 bw.write(configuracion + "\n");
                 bw.write(tiempoEjecucion + "\n");

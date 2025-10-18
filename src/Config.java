@@ -1,12 +1,15 @@
+
+import java.util.Random;
 public class Config {
+    // Experimento
+    public int numExperimento = 1;
 
     // Escenario general
-    
     public int numGasolineras = 100;
     public int numCentros = 10;
-    public int numCamionesPorCentro = 2;
-    public int seedGasolineras = 1234;
-    public int seedCentros = 5678;
+    public int numCamionesPorCentro = 1;
+    public int seedGasolineras = (int)(Math.random() * 9999) + 1;;
+    public int seedCentros = (int)(Math.random() * 9999) + 1;;
 
     // Solucion a usar: 1 = Simple, 2 = Ordenada
     public int numSolucion = 2;

@@ -54,6 +54,26 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
                     }
                 }
             }
+            // (2) Intercambio con peticiones pendientes
+            for (int pi = 0; pi < camionI.size(); pi++) {
+                int petI = camionI.get(pi);
+                for (int petPend : new ArrayList<>(board.getPeticionesPendientes())) {
+                    GasolinaEstado newBoard = board.copia();
+
+                    // Swap: quitar de pendientes y añadir al camión
+                    newBoard.getPeticionesPendientes().remove((Integer) petPend);
+                    newBoard.getPeticionesPendientes().add(petI);
+                    newBoard.getAsignacionCamionPeticiones().get(i).set(pi, petPend);
+                    newBoard.calcularBeneficioYDistancia();
+
+                    if (cumpleRestricciones(newBoard, i)) {
+                        retval.add(new Successor(
+                            "Swap petición " + petI + " (camión " + i + ")  " + petPend + " (pendiente)",
+                            newBoard
+                        ));
+                    }
+                }
+            }
         }
 
         // 2. Intercambiar peticiones entre camiones ---
@@ -90,31 +110,7 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
                 }
             }
         }
-        // 3. Desasignar una petición de un camión (devolver a pendientes)
-        for (int i = 0; i < numCamiones; i++) {
-            // Iteramos sobre una copia de la lista de peticiones para evitar problemas de
-            // concurrencia
-            ArrayList<Integer> camionI = new ArrayList<>(asignaciones.get(i));
-
-            for (int peticion : camionI) {
-                // Crear copia del estado
-                GasolinaEstado newBoard = board.copia();
-
-                // Quitar la petición del camión en la copia
-                newBoard.getAsignacionCamionPeticiones().get(i).remove((Integer) peticion);
-
-                // Añadir la petición a la lista de pendientes en la copia
-                newBoard.getPeticionesPendientes().add(peticion);
-
-                // Recalcular métricas
-                newBoard.calcularBeneficioYDistancia();
-
-                // Añadir el sucesor
-                retval.add(new Successor(
-                        "Desasignar petición " + peticion + " del camión " + i,
-                        newBoard));
-            }
-        }
+        
 
         // 4. Asignar una petición pendiente a un camión
         // Iteramos sobre una copia de la lista de pendientes para no modificar el
