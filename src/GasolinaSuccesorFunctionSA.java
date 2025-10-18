@@ -94,30 +94,20 @@ public class GasolinaSuccesorFunctionSA implements SuccessorFunction {
                 break;
 
             case 2:
-                // Swap entre una petición asignada y una pendiente
-                int camSwap = rand.nextInt(numCamiones);
-                ArrayList<Integer> petCam = asignaciones.get(camSwap);
-                ArrayList<Integer> pendientesSwap = new ArrayList<>(board.getPeticionesPendientes());
+                // Desasignar una petición de un camión
+                // indice del camion a desasignar
+                int camDesasignar = rand.nextInt(numCamiones);
+                // peticones del camion a desasignar
+                ArrayList<Integer> petCam = asignaciones.get(camDesasignar);
 
-                if (!petCam.isEmpty() && !pendientesSwap.isEmpty()) {
-                    // Elegimos una petición aleatoria del camión y una pendiente aleatoria
-                    int idxCam = rand.nextInt(petCam.size());
-                    int idxPend = rand.nextInt(pendientesSwap.size());
-
-                    int petAsignada = petCam.get(idxCam);
-                    int petPend = pendientesSwap.get(idxPend);
-
-                    // Swap: asignada pasa a pendientes, pendiente pasa al camión
-                    newBoard.getAsignacionCamionPeticiones().get(camSwap).set(idxCam, petPend);
-                    newBoard.getPeticionesPendientes().remove((Integer) petPend);
-                    newBoard.getPeticionesPendientes().add(petAsignada);
+                if (!petCam.isEmpty()) {
+                    int peticion = petCam.get(rand.nextInt(petCam.size()));
+                    newBoard.getPeticionesPendientes().add(peticion);
+                    newBoard.getAsignacionCamionPeticiones().get(camDesasignar).remove((Integer) peticion);
 
                     newBoard.calcularBeneficioYDistancia();
-                    if (cumpleRestricciones(newBoard, camSwap)) {
-                        action = "Swap peticion " + petAsignada + " (camión " + camSwap + ") con " 
-                                + petPend + " (pendiente)";
-                        retval.add(new Successor(action, newBoard));
-                    }
+
+                    action = "Desasignar petición " + peticion + " del camión " + camDesasignar;
                 }
                 break;
 

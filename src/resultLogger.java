@@ -22,16 +22,19 @@ public class ResultLogger {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombreArchivo))) {
 
                 // Encabezado informativo
-                bw.write("# RESULTADOS SIMULACION GASOLINA\n");
-                bw.write("# Línea 1: Algoritmo\n");
-                bw.write("# Línea 2: Parámetros de configuración\n");
-                bw.write("# Línea 3: Tiempo de ejecución (ms)\n");
-                bw.write("# Línea 4: Número total de peticiones iniciales\n");
-                bw.write("# Línea 5: Beneficio final\n");
-                bw.write("# Línea 6: Distancia total recorrida\n");
-                bw.write("# Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
-                bw.write("# Última línea: Total de peticiones asignadas\n\n");
+                /*
+                    bw.write("# RESULTADOS SIMULACION GASOLINA\n");
+                    bw.write("# Línea 1: Algoritmo\n");
+                    bw.write("# Línea 2: Parámetros de configuración\n");
+                    bw.write("# Línea 3: Tiempo de ejecución (ms)\n");
+                    bw.write("# Línea 4: Número total de peticiones iniciales\n");
+                    bw.write("# Línea 5: Beneficio final\n");
+                    bw.write("# Línea 6: Distancia total recorrida\n");
+                    bw.write("# Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
+                    bw.write("# Última línea: Total de peticiones asignadas\n\n");
 
+                */
+                
                 // Datos generales
                 bw.write(algoritmo + "\n");
                 bw.write(configuracion + "\n");

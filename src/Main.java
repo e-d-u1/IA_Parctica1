@@ -12,6 +12,12 @@ public class Main {
         // Cargar configuración
         Config cfg = new Config();
 
+        cfg.usarSimulatedAnnealing = args[0].equals("SA");
+        cfg.steps = Integer.parseInt(args[1]);
+        cfg.stiter = Integer.parseInt(args[2]);
+        cfg.k = Integer.parseInt(args[3]);
+        cfg.lambda = Double.parseDouble(args[4]);
+
         // Escenario
         Gasolineras gasolineras = new Gasolineras(cfg.numGasolineras, cfg.seedGasolineras);
         CentrosDistribucion centros = new CentrosDistribucion(cfg.numCentros, cfg.numCamionesPorCentro, cfg.seedCentros);
