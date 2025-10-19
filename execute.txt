@@ -7,5 +7,5 @@ Pendiente:
 -PeticionID puede ser *3 ya que nunca tendremos index + 3
 -Tener en cuenta que con remove y add pueden haber asiganciones con NULL
 
-
-!!! Solo funciona con 2 camiones por centro pq el centros.size() entonces es = 10,
++Exp4 que dura mucho
++Exp6 forzar dias pendientes con nueva funcion q modifique el total

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from itertools import product
 from mpl_toolkits.mplot3d import Axes3D
 
+numExp = 3
+
 # ------------------------------
 # Parámetros a probar
 # ------------------------------
@@ -29,13 +31,11 @@ resultado = {}
 for k, lam, st in product(ks, lambdas, stiters):
     beneficios = []
     for r in range(reps):
-        # Semilla diferente para cada repetición
-        seed = int(time.time() * 1000) % 100000 + r
 
         # Comando Java
         cmd = [
-            "java", "-cp", "lib/*;src", "Main", "SA",
-            "10000", str(st), str(k), str(lam), str(seed)
+            "java", "-cp", "lib/*;src", "Main", str(numExp) ,"SA",
+            "10000", str(st), str(k), str(lam)
         ]
         print(f"Ejecutando: k={k}, lambda={lam}, stiter={st}, rep={r+1}")
         subprocess.run(cmd)

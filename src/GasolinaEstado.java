@@ -21,11 +21,13 @@ public class GasolinaEstado {
     private double beneficioTotal;
     private double distanciaTotal;
 
-    public static final int MAX_VIAJES = 5;
-    public static final int MAX_DISTANCIA = 640;
-    public static final int MAX_PETICIONES_GAS = 3; 
-    public static final double COSTE_KM = 2.0;
-    public static final int VALOR_DEPOSITO = 1000;
+    public int MAX_VIAJES;
+    public int MAX_DISTANCIA;
+    public int MAX_PETICIONES_GAS; 
+    public double COSTE_KM;
+    public int VALOR_DEPOSITO;
+    
+    
     
     // Integracion Solucion 2
 
@@ -61,10 +63,18 @@ public class GasolinaEstado {
     }
 
     // CONSTRUCTOR DELMAIN
-    public GasolinaEstado(Gasolineras g, CentrosDistribucion c, int numSolucion) {
+    public GasolinaEstado(Gasolineras g, CentrosDistribucion c, Config cfg) {
         this.gasolineras = g;
         this.centros = c;
-        System.out.println("Peticiones totales Ini: " + getNumPeticiones());
+        ////System.out.println("Peticiones totales Ini: " + getNumPeticiones());
+
+        // Restricciones del Config
+        this.MAX_VIAJES = cfg.maxViajes;
+        this.MAX_DISTANCIA = cfg.maxDistancia;
+        this.MAX_PETICIONES_GAS = cfg.maxPeticionesGas;
+        this.COSTE_KM = cfg.costeKm;
+        this.VALOR_DEPOSITO = cfg.valorDeposito;
+        
 
         // Inicializa la estructura de asignación
         int numCamiones = c.size();
@@ -77,7 +87,7 @@ public class GasolinaEstado {
 
         inicializaArrayPeticiones();
 
-        if(numSolucion == 1) generarSolucionInicialSimple();
+        if(cfg.numSolucion == 1) generarSolucionInicialSimple();
         else generarSolucionInicialOrdenada();
         actualizarPeticionesPendientes();
     
@@ -97,7 +107,7 @@ public class GasolinaEstado {
     }
 
     private void generarSolucionInicialSimple() {
-         System.out.println("GENERAMOS SOLUCION INICIAL SIMPLE");
+        System.out.println("GENERAMOS SOLUCION INICIAL SIMPLE");
         // Crear lista de peticiones pendientes temporal
         ArrayList<Integer> pendientes = new ArrayList<>();
 
@@ -172,7 +182,7 @@ public class GasolinaEstado {
     private void generarSolucionInicialOrdenada() {
         precalcularMatrizDistancias(); // ya genera gasolinerasOrdenadas[centroId]
 
-        System.out.println("GENERAMOS SOLUCION INICIAL ORDENADA");
+        ////System.out.println("GENERAMOS SOLUCION INICIAL ORDENADA");
 
         int numCamiones = centros.size();    
         boolean quedanPeticiones = true;
@@ -281,8 +291,6 @@ public class GasolinaEstado {
             final int idxCentro = i;
             gasolinerasOrdenadas[i].sort((a, b) -> compararDistancias(distancias, idxCentro, a, b));
         }
-
-        System.out.println("Distancias precalculadas [centro][gasolinera] y gasolineras ordenadas por centro");
     }
 
 
@@ -301,7 +309,6 @@ public class GasolinaEstado {
                 // Peticiones del viaje actual
                 
                 int petId1 = peticiones.get(j);
-                //System.out.println("La peticion " + petId1 + " tiene de longitud: " + peticionesTotalesDias.size());
                 Gasolinera g1 = gasolineras.get(petId1 / 10);
 
                 Gasolinera g2 = null;
@@ -332,8 +339,6 @@ public class GasolinaEstado {
             }
         }
 
-        //System.out.println("Tenemos beneficio de "  + totalBeneficio + " con distandia de " + totalDistancia);
-        // Restar coste de combustible
         totalBeneficio =  totalBeneficio  - COSTE_KM * totalDistancia;
 
         this.beneficioTotal = totalBeneficio;
@@ -350,6 +355,11 @@ public class GasolinaEstado {
 
     public GasolinaEstado copia() {
         GasolinaEstado nuevo = new GasolinaEstado(this.gasolineras, this.centros, true);
+        nuevo.MAX_VIAJES = this.MAX_VIAJES;
+        nuevo.MAX_DISTANCIA = this.MAX_DISTANCIA;
+        nuevo.MAX_PETICIONES_GAS = this.MAX_PETICIONES_GAS;
+        nuevo.COSTE_KM = this.COSTE_KM;
+        nuevo.VALOR_DEPOSITO = this.VALOR_DEPOSITO;
 
         // Copiar la asignación de camiones
         for (int i = 0; i < this.asignacionCamionPeticiones.size(); i++) {
@@ -438,7 +448,7 @@ public class GasolinaEstado {
         for (int i = 0; i < asignacionCamionPeticiones.size(); i++) {
             ArrayList<Integer> peticiones = asignacionCamionPeticiones.get(i);
             if (peticiones.isEmpty()) {
-                System.out.println("Camión " + i + " no tiene peticiones asignadas.\n");
+                //System.out.println("Camión " + i + " no tiene peticiones asignadas.\n");
                 continue;
             }
 
@@ -517,6 +527,6 @@ public class GasolinaEstado {
             }
         }
 
-        System.out.println("Peticiones pendientes: " + peticionesPendientes.size());
+        //System.out.println("Peticiones pendientes: " + peticionesPendientes.size());
     }
 }

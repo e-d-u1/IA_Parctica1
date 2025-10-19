@@ -53,6 +53,7 @@ public class ResultLogger {
 
                 // Total de peticiones asignadas
                 bw.write(estadoFinal.getTotalPeticionesAsignadas() + "\n");
+                bw.write(cfg.costeKm + "\n");
             }
 
             System.out.println("Resultados guardados en " + nombreArchivo);

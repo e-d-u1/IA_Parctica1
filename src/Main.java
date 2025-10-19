@@ -11,19 +11,15 @@ public class Main {
 
         // Cargar configuración
         Config cfg = new Config();
-
-        cfg.usarSimulatedAnnealing = args[0].equals("SA");
-        cfg.steps = Integer.parseInt(args[1]);
-        cfg.stiter = Integer.parseInt(args[2]);
-        cfg.k = Integer.parseInt(args[3]);
-        cfg.lambda = Double.parseDouble(args[4]);
+        inicializaExperimento(cfg, args);
+        
 
         // Escenario
         Gasolineras gasolineras = new Gasolineras(cfg.numGasolineras, cfg.seedGasolineras);
         CentrosDistribucion centros = new CentrosDistribucion(cfg.numCentros, cfg.numCamionesPorCentro, cfg.seedCentros);
         
         // Estado inicial
-        GasolinaEstado estadoInicial = new GasolinaEstado(gasolineras, centros, cfg.numSolucion);
+        GasolinaEstado estadoInicial = new GasolinaEstado(gasolineras, centros, cfg);
 
         if (cfg.usarSimulatedAnnealing) ejecutarBusquedaSimulatedAnnealing(estadoInicial, cfg);
         else ejecutarBusquedaHillClimbing(estadoInicial, cfg);
@@ -112,4 +108,71 @@ public class Main {
             System.out.println((String) action);
         }
     }
+
+    private static void inicializaExperimento(Config cfg, String[] args) {
+        if (args.length < 1) return;
+
+        int exp = Integer.parseInt(args[0]);
+        cfg.numExperimento = exp;
+        cfg.usarSimulatedAnnealing = args[1].equalsIgnoreCase("SA");
+
+        // En todos los exp los args empiezan en el 2
+        switch (exp) {
+            case 2:
+                if (cfg.usarSimulatedAnnealing) return;
+                cfg.numCentros = 10;
+                cfg.numGasolineras = 100;
+                cfg.numCamionesPorCentro = 1;
+                cfg.numSolucion = Integer.parseInt(args[2]);
+                break;
+            case 3:
+                // Si usamos SA, cargamos parámetros adicionales
+                if (cfg.usarSimulatedAnnealing) {
+                    cfg.steps = Integer.parseInt(args[2]);   // steps
+                    cfg.stiter = Integer.parseInt(args[3]);  // stiter
+                    cfg.k = Integer.parseInt(args[4]);       // K
+                    cfg.lambda = Double.parseDouble(args[5]); // lambda
+                }
+                break;
+            case 4:
+                cfg.numCentros = Integer.parseInt(args[2]);
+                cfg.numGasolineras = cfg.numCentros * 10; // relación 1:10
+
+                if (cfg.usarSimulatedAnnealing) {
+                    cfg.steps = Integer.parseInt(args[3]);
+                    cfg.stiter = Integer.parseInt(args[4]);
+                    cfg.k = Integer.parseInt(args[5]);
+                    cfg.lambda = Double.parseDouble(args[6]);
+                }
+                break;
+            case 5:
+                // Escenario del primer apartado + HC
+                if (cfg.usarSimulatedAnnealing) return;
+                cfg.numCentros = Integer.parseInt(args[2]);
+                cfg.numGasolineras = 100;
+                cfg.numCamionesPorCentro = Integer.parseInt(args[3]);;
+                cfg.costeKm = Integer.parseInt(args[2]);
+                break;
+            case 6:
+                // Escenario del primer apartado + HC
+                if (cfg.usarSimulatedAnnealing) return;
+                cfg.numCentros = 10;
+                cfg.numGasolineras = 100;
+                cfg.numCamionesPorCentro = 1;
+                cfg.costeKm = Integer.parseInt(args[2]);
+                break;
+            case 7: 
+                // Escenario del primer apartado + HC
+                if (cfg.usarSimulatedAnnealing) return;
+                cfg.numCentros = 10;
+                cfg.numGasolineras = 100;
+                cfg.numCamionesPorCentro = 1;
+                cfg.maxDistancia = Integer.parseInt(args[2]);
+                break;
+
+            default:
+                return;
+        }
+    }
+
 }

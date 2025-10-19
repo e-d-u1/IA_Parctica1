@@ -120,7 +120,6 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         // Iteramos sobre una copia de la lista de pendientes para no modificar el
         // original durante la iteración
         ArrayList<Integer> pendientes = new ArrayList<>(board.getPeticionesPendientes());
-
         for (int pet : pendientes) {
             for (int i = 0; i < numCamiones; i++) {
                 // Crear copia del estado
@@ -153,6 +152,6 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         double distancia = estado.getDistanciaCamion(camionId);
         int viajes = estado.getViajesCamion(camionId);
 
-        return distancia <= GasolinaEstado.MAX_DISTANCIA && viajes <= GasolinaEstado.MAX_VIAJES;
+        return distancia <= estado.MAX_DISTANCIA && viajes <= estado.MAX_VIAJES;
     }
 }
