@@ -91,24 +91,17 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         }
         // 3. Desasignar una petición de un camión (la devolvemos a pendientes)
         for (int i = 0; i < numCamiones; i++) {
-            // Iteramos sobre una copia de la lista de peticiones para evitar problemas de
-            // concurrencia
+            // Usamos una copia de las asignaciones ya que sino había problemas de concurrencia
             ArrayList<Integer> camionI = new ArrayList<>(asignaciones.get(i));
 
             for (int peticion : camionI) {
-                // Crear copia del estado
+                
                 GasolinaEstado newBoard = board.copia();
 
-                // Quitar la petición del camión en la copia
-                newBoard.getAsignacionCamionPeticiones().get(i).remove((Integer) peticion);
+                newBoard.getAsignacionCamionPeticiones().get(i).remove((Integer) peticion);// Quitamos la petición del camión 
+                newBoard.getPeticionesPendientes().add(peticion); // La añadimos a pendientes
 
-                // Añadir la petición a la lista de pendientes en la copia
-                newBoard.getPeticionesPendientes().add(peticion);
-
-                // Recalcular métricas
                 newBoard.calcularBeneficioYDistancia();
-
-                // Añadir el sucesor
                 retval.add(new Successor(
                         "Desasignar petición " + peticion + " del camión " + i,
                         newBoard));
@@ -116,21 +109,15 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         }
 
         // 4. Asignar una petición pendiente a un camión
-        // Iteramos sobre una copia de la lista de pendientes para no modificar el
-        // original durante la iteración
+        // Iteramos sobre una copia de la lista de pendientes para no modificar el original 
         ArrayList<Integer> pendientes = new ArrayList<>(board.getPeticionesPendientes());
         for (int pet : pendientes) {
             for (int i = 0; i < numCamiones; i++) {
-                // Crear copia del estado
                 GasolinaEstado newBoard = board.copia();
 
-                // Añadir petición al camión en la copia
-                newBoard.getAsignacionCamionPeticiones().get(i).add(pet);
+                newBoard.getAsignacionCamionPeticiones().get(i).add(pet);// Añadimos la petición al camión
+                newBoard.getPeticionesPendientes().remove((Integer) pet); // Eliminamos de pendientes
 
-                // Quitar la petición de pendientes en la copia
-                newBoard.getPeticionesPendientes().remove((Integer) pet);
-
-                // Recalcular métricas
                 newBoard.calcularBeneficioYDistancia();
 
                 // Verificar restricciones después de añadir
@@ -145,12 +132,10 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         return retval;
     }
 
-    // Función auxiliar para verificar restricciones de un camión
+    // Auxiliar para comprobar las restricciones
     private boolean cumpleRestricciones(GasolinaEstado estado, int camionId) {
-        // Calcular viajes y distancia del camión
         double distancia = estado.getDistanciaCamion(camionId);
         int viajes = estado.getViajesCamion(camionId);
-
         return distancia <= estado.MAX_DISTANCIA && viajes <= estado.MAX_VIAJES;
     }
 }

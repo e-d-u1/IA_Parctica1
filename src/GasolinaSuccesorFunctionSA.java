@@ -136,12 +136,10 @@ public class GasolinaSuccesorFunctionSA implements SuccessorFunction {
         return retval;
     }
 
-    // Función auxiliar para verificar restricciones de un camión
+    // Auxiliar para comprobar las restricciones
     private boolean cumpleRestricciones(GasolinaEstado estado, int camionId) {
-        // Calcular viajes y distancia del camión
         double distancia = estado.getDistanciaCamion(camionId);
         int viajes = estado.getViajesCamion(camionId);
-
         return distancia <= estado.MAX_DISTANCIA && viajes <= estado.MAX_VIAJES;
     }
 }
