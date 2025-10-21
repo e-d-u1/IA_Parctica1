@@ -9,16 +9,14 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        // Cargar configuración
+        // Configuración inicial
         Config cfg = new Config();
         inicializaExperimento(cfg, args);
-        
 
-        // Escenario
         Gasolineras gasolineras = new Gasolineras(cfg.numGasolineras, cfg.seedGasolineras);
         CentrosDistribucion centros = new CentrosDistribucion(cfg.numCentros, cfg.numCamionesPorCentro, cfg.seedCentros);
         
-        // Estado inicial
+        // Estado inicial (Creadora solo usada para el main)
         GasolinaEstado estadoInicial = new GasolinaEstado(gasolineras, centros, cfg);
 
         if (cfg.usarSimulatedAnnealing) ejecutarBusquedaSimulatedAnnealing(estadoInicial, cfg);
@@ -41,14 +39,12 @@ public class Main {
         long endTime = System.currentTimeMillis();
 
         System.out.println("---------- SIMULATED ANNEALING ----------");
-        if (cfg.verbose) {
-            printInstrumentation(agent.getInstrumentation());
-        }
+        if (cfg.printInfo) printInstrumentation(agent.getInstrumentation());
 
         GasolinaEstado estadoFinal = (GasolinaEstado) algSA.getGoalState();
-
         mostrarResultadosFinales(estadoFinal);
 
+        // Pasamos todo al Logger para hacer tablas y gráficos
         if (cfg.guardarResultados) {
             String configuracion = "steps=" + cfg.steps +
                     ", stiter=" + cfg.stiter +
@@ -73,26 +69,21 @@ public class Main {
         long endTime = System.currentTimeMillis();
 
         System.out.println("----------- HILL CLIMBING -----------");
-        if (cfg.verbose) {
+        if (cfg.printInfo) { 
             printActions(agent.getActions());
             printInstrumentation(agent.getInstrumentation());
         }
 
         GasolinaEstado estadoFinal = (GasolinaEstado) algHC.getGoalState();
-
         mostrarResultadosFinales(estadoFinal);
 
-        if (cfg.guardarResultados) {
-            ResultLogger.guardarResultado("HC", "-", estadoInicial, estadoFinal, endTime - startTime, cfg);
-        }
+        if (cfg.guardarResultados) ResultLogger.guardarResultado("HC", "-", estadoInicial, estadoFinal, endTime - startTime, cfg);
     }
 
     private static void mostrarResultadosFinales(GasolinaEstado estadoFinal) {
         System.out.println("\nBeneficio final: " + estadoFinal.getBeneficio());
         System.out.println("Distancia total recorrida: " + estadoFinal.getDistanciaTotal());
         estadoFinal.imprimirResumenCamiones();
-
-        // --- COMPROBACION EXTRA: Edu ---
         estadoFinal.calcularBeneficioYDistancia();
         System.out.println("Total peticiones asignadas: " + estadoFinal.getTotalPeticionesAsignadas());
     }
@@ -110,6 +101,7 @@ public class Main {
     }
 
     private static void inicializaExperimento(Config cfg, String[] args) {
+        // Si la llamada tiene parámetros es para hacer algún expermiento
         if (args.length < 1) return;
 
         int exp = Integer.parseInt(args[0]);

@@ -1,10 +1,10 @@
 
 import java.util.Random;
 public class Config {
-    // Experimento
+    // Experimento - valor por defecto(no hace falta tocarlo)
     public int numExperimento = 1;
 
-    // Escenario general
+    // Configuración general
     public int numGasolineras = 5000;
     public int numCentros = 500;
     public int numCamionesPorCentro = 1;
@@ -22,16 +22,15 @@ public class Config {
     // Solucion a usar: 1 = Simple, 2 = Ordenada
     public int numSolucion = 2;
 
-    // Algoritmo a usar
     public boolean usarSimulatedAnnealing = true; // true = SA, false = HC
 
-    // Parámetros SA
+    // Parámetros SA (Establecidos a partir del experimento 3/4)
     public int steps = 1000;   // iteraciones totales
-    public int stiter = 100;    // iteraciones por cambio de temperatura
-    public int k = 25;          // parámetro k de aceptación 
-    public double lambda = 0.01; // tasa de enfriamiento
+    public int stiter = 100;    // iteraciones por temperatura
+    public int k = 25;          // temperatura 
+    public double lambda = 0.01; // velocidad enfriamiento
 
-    // Otros parámetros opcionales
-    public boolean verbose = false; // si se quieren imprimir resultados detallados
-    public boolean guardarResultados = true; // activar logging
+     
+    public boolean printInfo = false; // Imprimr por consola 
+    public boolean guardarResultados = true; // Loggearlo en carpeta /resultados
 }

@@ -17,33 +17,31 @@ public class ResultLogger {
                                         GasolinaEstado estadoInicial, GasolinaEstado estadoFinal,
                                         long tiempoEjecucion, Config cfg) {
         try {
-            // Generar un ID simple y único (timestamp + número aleatorio)
+            // Para generar un ID por segundo(en los experimentos se usa time.sleep(X) para no sobreescribir)
             String idUnico = new SimpleDateFormat("HHmmss").format(new Date());
 
-            // Crear nombre del archivo con el formato deseado
             String nombreArchivo = String.format("resultados/exp%d_%s.txt",
                     cfg.numExperimento,idUnico);
 
-            // Asegurar que exista la carpeta resultados/
+            // Dónde almacenamos los datos
             new File("resultados").mkdirs();
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombreArchivo))) {
 
-                // Encabezado informativo
                 /*
-                    bw.write("# RESULTADOS SIMULACION GASOLINA\n");
-                    bw.write("# Línea 1: Algoritmo\n");
-                    bw.write("# Línea 2: Parámetros de configuración\n");
-                    bw.write("# Línea 3: Tiempo de ejecución (ms)\n");
-                    bw.write("# Línea 4: Número total de peticiones iniciales\n");
-                    bw.write("# Línea 5: Beneficio final\n");
-                    bw.write("# Línea 6: Distancia total recorrida\n");
-                    bw.write("# Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)\n");
-                    bw.write("# Última línea: Total de peticiones asignadas\n\n");
-
+                    Formato:
+                    Línea 1: Algoritmo
+                    Línea 2: Parámetros de configuración
+                    Línea 3: Tiempo de ejecución (ms)
+                    Línea 4: Número total de peticiones iniciales
+                    Línea 5: Beneficio final
+                    Línea 6: Distancia total recorrida
+                    Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)
+                    Línea -3: Total de peticiones asignadas
+                    Línea -2: Coste por KM
+                    Línea -1: Diás que llevan pendiente las peticiones (0,1,2,3)
                 */
                 
-                // Datos generales
                 bw.write(algoritmo + "\n");
                 bw.write(configuracion + "\n");
                 bw.write(tiempoEjecucion + "\n");
@@ -51,7 +49,7 @@ public class ResultLogger {
                 bw.write(estadoFinal.getBeneficio() + "\n");
                 bw.write(estadoFinal.getDistanciaTotal() + "\n");
 
-                // Detalle por camión
+                // Info camión
                 for (int i = 0; i < estadoFinal.getAsignacionCamionPeticiones().size(); i++) {
                     bw.write(i + "," +
                             estadoFinal.getAsignacionCamionPeticiones().get(i).size() + "," +
@@ -59,14 +57,13 @@ public class ResultLogger {
                             estadoFinal.getViajesCamion(i) + "\n");
                 }
 
-                // Total de peticiones asignadas
                 bw.write(estadoFinal.getTotalPeticionesAsignadas() + "\n");
                 bw.write(cfg.costeKm + "\n");
                 ArrayList<Integer> dias = estadoFinal.getDiasPeticiones();
                 bw.write(dias.get(0) + "," + dias.get(1) + "," + dias.get(2) + "," + dias.get(3) + "\n");
             }
 
-            System.out.println("Resultados guardados en " + nombreArchivo);
+            System.out.println("Resultados guardados: " + nombreArchivo);
 
         } catch (IOException e) {
             System.err.println("Error al guardar resultados: " + e.getMessage());
