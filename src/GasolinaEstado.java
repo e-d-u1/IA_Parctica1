@@ -529,4 +529,32 @@ public class GasolinaEstado {
 
         //System.out.println("Peticiones pendientes: " + peticionesPendientes.size());
     }
+
+    // SOLO USADO PARA EXP 6
+    public ArrayList<Integer> getDiasPeticiones() {
+        ArrayList<Integer> diasPeticiones = new ArrayList<>();
+
+        int atendidasDia0 = 0;
+        int atendidasDia1 = 0;
+        int atendidasDia2 = 0;
+        int atendidasDia3 = 0;
+
+        for (ArrayList<Integer> camion : this.getAsignacionCamionPeticiones()) {
+            for (Integer petId : camion) {
+                Integer dias = this.peticionesTotalesDias.get(petId);  // accede directo a la variable
+                if (dias == 0) atendidasDia0++;
+                else if (dias == 1) atendidasDia1++;
+                else if (dias == 2) atendidasDia2++;
+                else if (dias == 3) atendidasDia3++;
+            }
+        }
+
+        diasPeticiones.add(atendidasDia0);
+        diasPeticiones.add(atendidasDia1);
+        diasPeticiones.add(atendidasDia2);
+        diasPeticiones.add(atendidasDia3);
+
+        return diasPeticiones;
+    }
+
 }

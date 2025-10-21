@@ -3,6 +3,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
+
+import java.lang.Math;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Random;
+
+
 public class ResultLogger {
 
     public static void guardarResultado(String algoritmo, String configuracion,
@@ -54,6 +62,8 @@ public class ResultLogger {
                 // Total de peticiones asignadas
                 bw.write(estadoFinal.getTotalPeticionesAsignadas() + "\n");
                 bw.write(cfg.costeKm + "\n");
+                ArrayList<Integer> dias = estadoFinal.getDiasPeticiones();
+                bw.write(dias.get(0) + "," + dias.get(1) + "," + dias.get(2) + "," + dias.get(3) + "\n");
             }
 
             System.out.println("Resultados guardados en " + nombreArchivo);

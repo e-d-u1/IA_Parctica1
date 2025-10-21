@@ -151,7 +151,6 @@ public class Main {
                 cfg.numCentros = Integer.parseInt(args[2]);
                 cfg.numGasolineras = 100;
                 cfg.numCamionesPorCentro = Integer.parseInt(args[3]);;
-                cfg.costeKm = Integer.parseInt(args[2]);
                 break;
             case 6:
                 // Escenario del primer apartado + HC

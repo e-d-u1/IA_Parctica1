@@ -11,7 +11,7 @@ configuraciones = [
     {"numCentros": 5, "camionesPorCentro": 2}
 ]
 numGasolineras = 100
-reps = 30  # repeticiones por configuración
+reps = 13  # repeticiones por configuración
 result_folder = "resultados"
 
 os.makedirs(result_folder, exist_ok=True)

@@ -2,11 +2,11 @@
 import java.util.Random;
 public class Config {
     // Experimento
-    public int numExperimento = 2;
+    public int numExperimento = 1;
 
     // Escenario general
-    public int numGasolineras = 100;
-    public int numCentros = 10;
+    public int numGasolineras = 5000;
+    public int numCentros = 500;
     public int numCamionesPorCentro = 1;
     public int seed = (int)(Math.random() * 9999) + 1;
     public int seedGasolineras = this.seed;
@@ -23,12 +23,12 @@ public class Config {
     public int numSolucion = 2;
 
     // Algoritmo a usar
-    public boolean usarSimulatedAnnealing = false; // true = SA, false = HC
+    public boolean usarSimulatedAnnealing = true; // true = SA, false = HC
 
     // Parámetros SA
     public int steps = 1000;   // iteraciones totales
     public int stiter = 100;    // iteraciones por cambio de temperatura
-    public int k = 20;          // parámetro k de aceptación 
+    public int k = 25;          // parámetro k de aceptación 
     public double lambda = 0.01; // tasa de enfriamiento
 
     // Otros parámetros opcionales

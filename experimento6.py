@@ -6,17 +6,19 @@ import matplotlib.pyplot as plt
 
 # --- Parámetros del experimento ---
 numExp = 6
-costes_km = [2, 4, 8, 16, 32, 64, 128, 512, 1024, 2048, 4096]  # se va doblando el coste
-reps = 10  # repeticiones por configuración
+costes_km = [2, 4, 8, 16, 32, 64, 128, 512, 1024, 2048, 4096]
+reps = 10
 result_folder = "resultados"
 
 os.makedirs(result_folder, exist_ok=True)
 
-# --- Almacenamos los resultados ---
-resultados = {}
+# --- Almacenamos los resultados por día ---
+dias_dict = {0: {}, 1: {}, 2: {}, 3: {}}
 
 for coste in costes_km:
-    peticiones_serv = []
+    # Inicializar listas para cada día
+    for d in range(4):
+        dias_dict[d][coste] = []
 
     for r in range(reps):
         print(f"Ejecutando Hill Climbing con coste={coste}, repetición {r+1}")
@@ -25,55 +27,48 @@ for coste in costes_km:
         cmd = ["java", "-cp", "lib/*;src", "Main", str(numExp), "HC", str(coste)]
         subprocess.run(cmd)
 
-        # Espera para evitar nombres repetidos en los logs
+        # Espera para evitar nombres repetidos
         time.sleep(0.3)
 
-        # Buscar el último archivo generado (que empiece por "exp6_")
+        # Buscar el último archivo generado
         files = sorted([f for f in os.listdir(result_folder) if f.startswith(f"exp{numExp}_")])
-
         if not files:
-            print(f"⚠️  No se encontró archivo de salida para coste={coste}, repetición={r+1}")
+            print(f"⚠️ No se encontró archivo de salida para coste={coste}, repetición={r+1}")
             continue
 
         latest_file = os.path.join(result_folder, files[-1])
 
-        # Leer el número total de peticiones servidas y coste por km del archivo
+        # Leer la última línea → días pendientes
         try:
             with open(latest_file, "r") as f:
-               lines = [l.strip() for l in f.readlines() if not l.startswith("#") and l.strip() != ""]
-               total_peticiones = int(lines[16])  # penúltima línea → peticiones servidas
-               coste_archivo = float(lines[17])     # última línea → coste por km (para comprobación)
-               if coste_archivo != coste:
-                     print(f"⚠️  Diferencia entre coste esperado ({coste}) y coste en archivo ({coste_archivo})")
-               peticiones_serv.append(total_peticiones)
+                lines = [l.strip() for l in f.readlines() if not l.startswith("#") and l.strip() != ""]
+                dias_line = lines[-1]  # última línea
+                dias_vals = [int(x) for x in dias_line.split(",")]
+                if len(dias_vals) != 4:
+                    print(f"⚠️ Formato incorrecto en {latest_file}: {dias_line}")
+                    continue
+                for d in range(4):
+                    dias_dict[d][coste].append(dias_vals[d])
         except Exception as e:
-            print(f"⚠️  Error leyendo {latest_file}: {e}")
+            print(f"⚠️ Error leyendo {latest_file}: {e}")
 
+# --- Graficar líneas con media ± desviación por día ---
+plt.figure(figsize=(10,6))
+dias_colores = ['royalblue', 'orange', 'green', 'red']
+dias_labels = ['Día 0', 'Día 1', 'Día 2', 'Día 3']
 
-    # Guardamos media y desviación típica si hay datos válidos
-    if peticiones_serv:
-        resultados[coste] = {
-            "media": np.mean(peticiones_serv),
-            "std": np.std(peticiones_serv)
-        }
+for d in range(4):
+    medias = [np.mean(dias_dict[d][c]) for c in costes_km]
+    stds = [np.std(dias_dict[d][c]) for c in costes_km]
+    plt.errorbar(costes_km, medias, yerr=stds, fmt='-o', capsize=4, color=dias_colores[d], label=dias_labels[d])
+# Forzar que los ticks sean tus valores exactos
+plt.xticks(costes_km, [str(c) for c in costes_km], rotation=45)
+plt.xlabel("Coste kilómetro")
+plt.ylabel("Número peticiones atendidas")
 
-# --- Mostrar resultados numéricos ---
-if resultados:
-    print("\n===== RESULTADOS EXPERIMENTO 6 =====")
-    for coste, datos in resultados.items():
-        print(f"Coste {coste}: {datos['media']:.2f} ± {datos['std']:.2f} peticiones")
+plt.title("Coste por km vs días pendientes peticiones")
 
-    # --- Graficar resultados ---
-    costes = sorted(resultados.keys())
-    medias = [resultados[c]["media"] for c in costes]
-    stds = [resultados[c]["std"] for c in costes]
+plt.grid(True, which="both", ls="--")
 
-    plt.figure(figsize=(8,5))
-    plt.errorbar(costes, medias, yerr=stds, fmt='-o', capsize=5, color='royalblue')
-    plt.xlabel("Coste por kilómetro")
-    plt.ylabel("Peticiones servidas (media)")
-    plt.title("Efecto del coste por km en el número de peticiones servidas (Hill Climbing)")
-    plt.grid(True)
-    plt.show()
-else:
-    print("⚠️  No se generaron resultados válidos. Revisa que el Main guarde los archivos correctamente.")
+plt.legend()
+plt.show()

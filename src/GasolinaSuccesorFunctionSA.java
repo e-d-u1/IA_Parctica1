@@ -142,7 +142,7 @@ public class GasolinaSuccesorFunctionSA implements SuccessorFunction {
         double distancia = estado.getDistanciaCamion(camionId);
         int viajes = estado.getViajesCamion(camionId);
 
-        return distancia <= GasolinaEstado.MAX_DISTANCIA && viajes <= GasolinaEstado.MAX_VIAJES;
+        return distancia <= estado.MAX_DISTANCIA && viajes <= estado.MAX_VIAJES;
     }
 }
 
