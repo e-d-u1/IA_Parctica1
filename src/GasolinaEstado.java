@@ -83,27 +83,27 @@ public class GasolinaEstado {
 
     public GasolinaEstado copia() {
         GasolinaEstado nuevo = new GasolinaEstado(this.gasolineras, this.centros, true);
-        // Todo y ser estático
         nuevo.MAX_VIAJES = this.MAX_VIAJES;
         nuevo.MAX_DISTANCIA = this.MAX_DISTANCIA;
         nuevo.MAX_PETICIONES_GAS = this.MAX_PETICIONES_GAS;
         nuevo.COSTE_KM = this.COSTE_KM;
         nuevo.VALOR_DEPOSITO = this.VALOR_DEPOSITO;
 
-        // Copiar la asignación de camiones
+        // Copiar la asignación de camiones (es una copia segura pq sino había problemas)
         for (int i = 0; i < this.asignacionCamionPeticiones.size(); i++) {
             nuevo.asignacionCamionPeticiones.set(i, new ArrayList<>(this.asignacionCamionPeticiones.get(i)));
         }
 
+         // Idem para las peticiones
+        nuevo.peticionesTotalesDias = new ArrayList<>(this.peticionesTotalesDias);
+        if (this.peticionesPendientes != null)
+            nuevo.peticionesPendientes = new ArrayList<>(this.peticionesPendientes);
+        
         // Copiar métricas
         nuevo.peticionesTotalesDias = this.peticionesTotalesDias;
         nuevo.beneficioTotal = this.beneficioTotal;
         nuevo.distanciaTotal = this.distanciaTotal;
-        
-        nuevo.peticionesTotalesDias = new ArrayList<>(this.peticionesTotalesDias);
-        if (this.peticionesPendientes != null)
-            nuevo.peticionesPendientes = new ArrayList<>(this.peticionesPendientes);
-
+    
         return nuevo;
     }
 
@@ -205,17 +205,16 @@ public class GasolinaEstado {
 
     /* --------------------  Sols. Iniciales -------------------- */
     private void generarSolucionInicialSimple() {
-        // Crear lista de peticiones pendientes temporal
+        // Creamos una lista temporal de peticiones
         ArrayList<Integer> pendientes = new ArrayList<>();
 
         for (int i = 0; i < gasolineras.size(); i++) {
             Gasolinera g = gasolineras.get(i);
             for (int j = 0; j < g.getPeticiones().size(); j++) {
-                pendientes.add(i * 10 + j); // ID único: gasolinera*10 + depósito
+                pendientes.add(i * 10 + j); // Usamos el ID único
             }
         }
 
-        // Inicializar métricas de cada camión
         int numCamiones = centros.size();
         int[] viajesRealizados = new int[numCamiones];
         double[] distanciaRecorrida = new double[numCamiones];
@@ -225,14 +224,15 @@ public class GasolinaEstado {
 
         // Mientras queden peticiones pendientes
         while (!pendientes.isEmpty()) {
-            // Tomamos una petición al azar
+
+            // Se elige una random
             int index = rnd.nextInt(pendientes.size());
             int petId = pendientes.get(index);
 
             int gasolineraId = petId / 10;
             Gasolinera g = gasolineras.get(gasolineraId);
 
-            // Buscar el camión más cercano que pueda atenderla
+            // Buscamos un sólo camión cercano para asignarsela
             int mejorCamion = -1;
             double menorDistancia = Double.MAX_VALUE;
 
@@ -259,24 +259,25 @@ public class GasolinaEstado {
                 viajesRealizados[mejorCamion]++;
                 distanciaRecorrida[mejorCamion] += menorDistancia;
             } else {
-                // Si no se puede asignar, queda pendiente
-                noAsignadas.add(petId);
+                noAsignadas.add(petId); // Si no se puede asignar, queda pendiente
             }
 
-            // Quitamos la petición temporal de la lista
             pendientes.remove(index);
         }
 
-        // Guardar las que no pudieron asignarse en peticionesPendientes
+        // Guardamos las que no se han asignado de las temporales
         peticionesPendientes.addAll(noAsignadas);
     }
 
-    /* Por cada Centro de Dsitribucion, al primero de sus camiones le sera asignada la gasolinera mas cercana que tenga peticion,
-       se recorreran todas las gasolineras hasta que se complete el primer viaje de ese camion(2 gasolineras asignadas). 
-       Luego pasa al primer camion del segundo centro, asi hasta visitar todos los camiones de todos los centros */
+    /* 
+    Idea: Genera una solución inicial ordenada, asignando de forma equilibarada, por cada viaje de un camón, 
+    la petición de la gasolineras más cercanas.
 
+    Pre: peticionesUsadas<petId> esta inicializado en false
+    Post: Se han asignado todas las peticiones posibles por orden de cercanía
+    */
     private void generarSolucionInicialOrdenada() {
-        precalcularMatrizDistancias(); // Genera gasolinerasOrdenadas[centroId][]
+        precalcularMatrizDistancias(); // Genera gasolinerasOrdenadas[centroId][gasolinera] y las ordena
 
         int numCamiones = centros.size();    
         boolean quedanPeticiones = true;

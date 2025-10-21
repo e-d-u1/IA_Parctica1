@@ -16,8 +16,7 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
         ArrayList<ArrayList<Integer>> asignaciones = board.getAsignacionCamionPeticiones();
         int numCamiones = asignaciones.size();
 
-        // 1. Mover una petición de un camión a otro ---
-
+        // 1. Mover una petición de un camión a otro 
         // Recorremos cada camión y sus peticiones
         for (int i = 0; i < numCamiones; i++) {
             ArrayList<Integer> camionI = asignaciones.get(i);
@@ -56,7 +55,7 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
             }
         }
 
-        // 2. Intercambiar peticiones entre camiones ---
+        // 2. Intercambiar peticiones entre camiones 
         // iteramos sobre todos los pares de camiones (i, j)
         for (int i = 0; i < numCamiones; i++) {
             for (int j = i + 1; j < numCamiones; j++) {
@@ -90,7 +89,7 @@ public class GasolinaSuccesorFunction implements SuccessorFunction {
                 }
             }
         }
-        // 3. Desasignar una petición de un camión (devolver a pendientes)
+        // 3. Desasignar una petición de un camión (la devolvemos a pendientes)
         for (int i = 0; i < numCamiones; i++) {
             // Iteramos sobre una copia de la lista de peticiones para evitar problemas de
             // concurrencia
