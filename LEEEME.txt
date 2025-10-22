@@ -1,0 +1,45 @@
+---------------------------------
+Práctica de Búsqueda Local - L12
+Ishak Felfoul, Eduard Corrons
+---------------------------------
+Modo de Ejecución:
+El entorno de desarrllo ha sido Windows11, con la versión de Java JDK21, cualquier versión posterior no debería tener problemas.
+Para ejecutar la práctica desde windows se deben ejecutar los dos siguientes comandos:
+
+# javac -cp "lib/*;src" src/Main.java 
+# java -cp "lib/*;src" Main
+
+El primero compila el archivo Main.java, añadiendo las librerías del directorio lib al CLASSPATH.
+El segundo ejecuta el programa, manteniendo las mismas rutas en el CLASSPATH.
+
+!En linux el separador de archivos es :, no el ;.
+
+Configuarción:
+Si se quisiera modificar la configuración general se debe hacer desde el Config.java, ahí se encuentran todas las 
+variables parametrizables del problema.
+Nota: numExp no se usa, solo se asigna cuando se pasaba por parámetro para hacer cada uno de los experimentos.
+
+Visualización de Resultados:
+El código tal como está entregado debería sacar los resultados por consola, se pueden volcar en un fichero de texto
+para visualizarlos de mejor forma.
+Además una vez ejecutado el ResultLogger.java es el encargado de crear un fichero de texto en la carpeta resultados
+con información relevante, para conocer la estructura consultar el archivo.
+Nota: Tener carpeta llamada /resultados en el directorio
+
+Finalmente el directorio usado tiene esta estructura:
+/mi_practica
+   /lib 
+      AIMA.jar
+      Gasolina.jar
+   /resultados
+   /src
+      Main.java
+      Config.java
+      GasolinaEstado.java
+      GasolinaGoalTest.java
+      GasolinaHeuristicFunction.java
+      GasolinaSuccessorFunction.java
+      GasolinaSuccessorFunctionSA.java
+      ResultLogger.java
+
+Todo se ejecutaba desde /mi_practica

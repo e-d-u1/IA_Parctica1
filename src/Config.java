@@ -5,8 +5,8 @@ public class Config {
     public int numExperimento = 1;
 
     // Configuración general
-    public int numGasolineras = 5000;
-    public int numCentros = 500;
+    public int numGasolineras = 100;
+    public int numCentros = 10;
     public int numCamionesPorCentro = 1;
     public int seed = (int)(Math.random() * 9999) + 1;
     public int seedGasolineras = this.seed;
@@ -22,7 +22,7 @@ public class Config {
     // Solucion a usar: 1 = Simple, 2 = Ordenada
     public int numSolucion = 2;
 
-    public boolean usarSimulatedAnnealing = true; // true = SA, false = HC
+    public boolean usarSimulatedAnnealing = false; // true = SA, false = HC
 
     // Parámetros SA (Establecidos a partir del experimento 3/4)
     public int steps = 1000;   // iteraciones totales
@@ -31,6 +31,6 @@ public class Config {
     public double lambda = 0.01; // velocidad enfriamiento
 
      
-    public boolean printInfo = false; // Imprimr por consola 
+    public boolean printInfo = true; // Imprimr por consola 
     public boolean guardarResultados = true; // Loggearlo en carpeta /resultados
 }
