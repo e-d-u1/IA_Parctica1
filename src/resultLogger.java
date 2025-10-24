@@ -39,7 +39,7 @@ public class ResultLogger {
                     Líneas siguientes: Detalle por camión (camión, #peticiones, distancia, viajes)
                     Línea -3: Total de peticiones asignadas
                     Línea -2: Coste por KM
-                    Línea -1: Diás que llevan pendiente las peticiones (0,1,2,3)
+                    Línea -1: Diás que llevan pendiente las peticiones (0,1,2,3))
                 */
                 
                 bw.write(algoritmo + "\n");
